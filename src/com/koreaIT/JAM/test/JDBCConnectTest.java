@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class JDBCConnectTest {
     public static void main(String[] args) {
-        String url = "jdbc:mysql://localhost:3306/2024_08_JAM"; // 데이터베이스 URL
+    	String url = "jdbc:mysql://localhost:3306/2024_08_JAM?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useOldAliasMetadataBehavior=true&zeroDateTimeNehavior=convertToNull"; // 데이터베이스 URL
         String username = "root"; // 데이터베이스 사용자 이름
         String password = ""; // 데이터베이스 비밀번호
 

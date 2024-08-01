@@ -1,5 +1,9 @@
 package com.koreaIT.JAM;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -14,6 +18,10 @@ public class Main {
 		
 		int lastArticleId = 1;
 		List<Article> articles = new ArrayList<>();
+		
+		String url = "jdbc:mysql://localhost:3306/2024_08_JAM?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useOldAliasMetadataBehavior=true&zeroDateTimeNehavior=convertToNull";
+        String username = "root";
+        String password = "";
 		
 		while (true) {
 			System.out.printf("명령어) ");
@@ -33,6 +41,40 @@ public class Main {
 				String title = sc.nextLine().trim();
 				System.out.printf("내용 : ");
 				String body = sc.nextLine().trim();
+				
+				Connection conn = null;
+		        PreparedStatement pstmt = null;
+				
+				try {
+		            conn = DriverManager.getConnection(url, username, password);
+
+		            String sql = "INSERT INTO article";
+		            sql += " SET regDate = NOW()";
+		            sql += ", updateDate = NOW()";
+		            sql += ", title = '" + title + "'";
+		            sql += ", `body` = '" + body + "';";
+		            
+		            pstmt = conn.prepareStatement(sql);
+		            pstmt.executeUpdate();
+		            
+		        } catch (SQLException e) {
+		            e.printStackTrace();
+		        } finally {
+		        	if (pstmt != null) {
+		        		try {
+		        			pstmt.close();
+		        		} catch (SQLException e) {
+		        			e.printStackTrace();
+		        		}
+		        	}
+		            if (conn != null) {
+		                try {
+		                    conn.close();
+		                } catch (SQLException e) {
+		                    e.printStackTrace();
+		                }
+		            }
+		        }
 				
 				Article article = new Article(lastArticleId, title, body);
 				
