@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import com.koreaIT.JAM.dto.Article;
+import com.koreaIT.JAM.util.DBUtil;
+import com.koreaIT.JAM.util.SecSql;
 
 public class Main {
 	public static void main(String[] args) {
@@ -17,15 +19,11 @@ public class Main {
 		
 		Scanner sc = new Scanner(System.in);
 		
-		int lastArticleId = 1;
-		
 		String url = "jdbc:mysql://localhost:3306/2024_08_JAM?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useOldAliasMetadataBehavior=true&zeroDateTimeNehavior=convertToNull";
         String username = "root";
         String password = "";
 		
         Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
         
         try {
         	conn = DriverManager.getConnection(url, username, password);
@@ -49,22 +47,17 @@ public class Main {
     				System.out.printf("내용 : ");
     				String body = sc.nextLine().trim();
     				
-    				try {
-    		            String sql = "INSERT INTO article";
-    		            sql += " SET regDate = NOW()";
-    		            sql += ", updateDate = NOW()";
-    		            sql += ", title = '" + title + "'";
-    		            sql += ", `body` = '" + body + "';";
-    		            
-    		            pstmt = conn.prepareStatement(sql);
-    		            pstmt.executeUpdate();
-    		            
-    		        } catch (SQLException e) {
-    		            e.printStackTrace();
-    		        }
+					SecSql sql = new SecSql();
+					sql.append("INSERT INTO article");
+					sql.append("SET regDate = NOW()");
+					sql.append(", updateDate = NOW()");
+					sql.append(", title = ?", title);
+					sql.append(", `body` = ?", body);
+					
+					int id = DBUtil.insert(conn, sql);
+					
+    				System.out.printf("%d번 게시물이 작성되었습니다\n", id);
     				
-    				System.out.printf("%d번 게시물이 작성되었습니다\n", lastArticleId);
-    				lastArticleId++;
     			} else if (cmd.equals("article list")) {
     		        List<Article> articles = new ArrayList<>();
     		        
