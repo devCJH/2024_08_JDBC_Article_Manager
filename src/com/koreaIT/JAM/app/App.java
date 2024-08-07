@@ -40,7 +40,77 @@ public class App {
     				continue;
     			}
     			
-    			if (cmd.equals("article write")) {
+    			if (cmd.equals("member join")) {
+    				String loginId = null;
+    				String loginPw = null;
+    				String name = null;
+    				
+    				while (true) {
+    					System.out.printf("아이디 : ");
+        				loginId = sc.nextLine().trim();
+        				
+        				if (loginId.length() == 0) {
+        					System.out.println("아이디는 필수 입력 정보입니다");
+        					continue;
+        				}
+        				
+        				SecSql sql = new SecSql();
+        				sql.append("SELECT COUNT(id) > 0 FROM `member`");
+        				sql.append("WHERE loginId = ?", loginId);
+        				
+         		        boolean isLoginIdDup = DBUtil.selectRowBooleanValue(conn, sql);
+         		        
+         		        if (isLoginIdDup) {
+         		        	System.out.printf("[ %s ]은(는) 이미 사용중인 아이디입니다\n", loginId);
+     		            	continue;
+         		        }
+         		        System.out.printf("[ %s ]은(는) 사용가능한 아이디입니다\n", loginId);
+        				
+        				break;
+    				}
+    				
+    				while (true) {
+    					System.out.printf("비밀번호 : ");
+        				loginPw = sc.nextLine().trim();
+        				
+        				if (loginPw.length() == 0) {
+        					System.out.println("비밀번호는 필수 입력 정보입니다");
+        					continue;
+        				}
+        				
+        				System.out.printf("비밀번호 확인 : ");
+        				String loginPwChk = sc.nextLine().trim();
+        				
+        				if (loginPw.equals(loginPwChk) == false) {
+        					System.out.println("비밀번호가 다릅니다.");
+        					continue;
+        				}
+        				break;
+    				}
+    				
+    				while (true) {
+    					System.out.printf("이름 : ");
+    					name = sc.nextLine().trim();
+    					
+    					if (name.length() == 0) {
+        					System.out.println("이름은 필수 입력 정보입니다");
+        					continue;
+        				}
+    					break;
+    				}
+    				
+					SecSql sql = new SecSql();
+					sql.append("INSERT INTO `member`");
+					sql.append("SET regDate = NOW()");
+					sql.append(", updateDate = NOW()");
+					sql.append(", loginId = ?", loginId);
+					sql.append(", loginPw = ?", loginPw);
+					sql.append(", `name` = ?", name);
+					
+					DBUtil.insert(conn, sql);
+					
+    				System.out.printf("[ %s ]님의 가입이 완료되었습니다\n", name);
+    			} else if (cmd.equals("article write")) {
     				System.out.printf("제목 : ");
     				String title = sc.nextLine().trim();
     				System.out.printf("내용 : ");
