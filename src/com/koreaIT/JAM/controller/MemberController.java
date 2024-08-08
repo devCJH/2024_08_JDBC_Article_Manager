@@ -3,18 +3,17 @@ package com.koreaIT.JAM.controller;
 import java.sql.Connection;
 import java.util.Scanner;
 
+import com.koreaIT.JAM.dto.Member;
 import com.koreaIT.JAM.service.MemberService;
 
 public class MemberController {
 
 	private Scanner sc;
 	private MemberService memberService;
-//	private MemberDao memberDao;
 	
 	public MemberController(Connection conn, Scanner sc) {
 		this.sc = sc;
 		this.memberService = new MemberService(conn);
-//		this.memberDao = new MemberDao(conn);
 	}
 	
 	public void doJoin() {
@@ -77,4 +76,40 @@ public class MemberController {
 		System.out.printf("[ %s ]님의 가입이 완료되었습니다\n", name);
 	}
 
+	public void doLogin() {
+		String loginId = null;
+		String loginPw = null;
+		
+		while(true) {
+			System.out.printf("아이디 : ");
+			loginId = sc.nextLine().trim();
+			System.out.printf("아이디 : ");
+			loginPw = sc.nextLine().trim();
+			
+			if (loginId.length() == 0) {
+				System.out.println("아이디를 입력해주세요");
+				continue;
+			}
+			
+			if (loginPw.length() == 0) {
+				System.out.println("비밀번호를 입력해주세요");
+				continue;
+			}
+			
+			Member member = memberService.getMemberByLoginId(loginId);
+			
+			if (member == null) {
+				System.out.printf("[ %s ]은(는) 존재하지 않는 아이디입니다\n", loginId);
+				continue;
+			}
+			
+			if (member.getLoginPw().equals(loginPw) == false) {
+				System.out.println("비밀번호가 일치하지 않습니다");
+				continue;
+			}
+			break;
+		}
+		
+		System.out.printf("[ %s ] 회원님 환영합니다~!\n", loginId);
+	}
 }
