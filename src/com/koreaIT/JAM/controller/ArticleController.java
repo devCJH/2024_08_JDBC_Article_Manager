@@ -1,23 +1,20 @@
 package com.koreaIT.JAM.controller;
 
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 import com.koreaIT.JAM.dto.Article;
-import com.koreaIT.JAM.util.DBUtil;
-import com.koreaIT.JAM.util.SecSql;
+import com.koreaIT.JAM.service.ArticleService;
 
 public class ArticleController {
 
 	private Scanner sc;
-	private Connection conn;
+	private ArticleService articleService;
 	
 	public ArticleController(Connection conn, Scanner sc) {
-		this.conn = conn;
 		this.sc = sc;
+		this.articleService = new ArticleService(conn);
 	}
 
 	public void doWrite() {
@@ -26,31 +23,16 @@ public class ArticleController {
 		System.out.printf("내용 : ");
 		String body = sc.nextLine().trim();
 		
-		SecSql sql = new SecSql();
-		sql.append("INSERT INTO article");
-		sql.append("SET regDate = NOW()");
-		sql.append(", updateDate = NOW()");
-		sql.append(", title = ?", title);
-		sql.append(", `body` = ?", body);
+		articleService.writeArticle(title, body);
 		
-		int id = DBUtil.insert(conn, sql);
+		int id = articleService.getLastInsertId();
 		
 		System.out.printf("%d번 게시물이 작성되었습니다\n", id);
 	}
 
 	public void showList() {
-		List<Article> articles = new ArrayList<>();
+		List<Article> articles = articleService.getArticles();
         
-    	SecSql sql = new SecSql();
-		sql.append("SELECT * FROM article");
-		sql.append("ORDER BY id DESC");
-        
-		List<Map<String, Object>> articleListMap = DBUtil.selectRows(conn, sql);
-		
-		for (Map<String, Object> articleMap : articleListMap) {
-			articles.add(new Article(articleMap));
-		}
-		
 		if (articles.size() == 0) {
 			System.out.println("게시물이 없습니다");
 			return;
@@ -63,27 +45,20 @@ public class ArticleController {
 	}
 
 	public void showDetail(String cmd) {
-		int id = -1;
+		int id = articleService.getCmdNum(cmd);
 		
-        try {
-        	id = Integer.parseInt(cmd.split(" ")[2]);
-        } catch (NumberFormatException e) {
-        	System.out.println("명령어를 확인해주세요");
-        	return;
+		if (id == -1) {
+			System.out.println("명령어를 확인해주세요");
+			return;
 		}
         
-        SecSql sql = SecSql.from("SELECT * FROM article");
-		sql.append("WHERE id = ?", id);
-		
-		Map<String, Object> articleMap = DBUtil.selectRow(conn, sql);
-		
-		if (articleMap.isEmpty()) {
+        Article article = articleService.getArticle(id);
+        
+		if (article == null) {
         	System.out.printf("%d번 게시물은 존재하지 않습니다\n", id);
         	return;
         }
 		
-        Article article = new Article(articleMap);
-        
         System.out.printf("번호 : %d\n", article.getId());
         System.out.printf("작성일 : %s\n", article.getRegDate());
         System.out.printf("수정일 : %s\n", article.getUpdateDate());
@@ -92,19 +67,14 @@ public class ArticleController {
 	}
 
 	public void doModify(String cmd) {
-		int id = -1;
+		int id = articleService.getCmdNum(cmd);
 		
-        try {
-        	id = Integer.parseInt(cmd.split(" ")[2]);
-        } catch (NumberFormatException e) {
-        	System.out.println("명령어를 확인해주세요");
+		if (id == -1) {
+			System.out.println("명령어를 확인해주세요");
+			return;
 		}
         
-        SecSql sql = new SecSql();
-        sql.append("SELECT COUNT(id) FROM article");
-        sql.append("WHERE id = ?", id);
-
-        int articleCnt = DBUtil.selectRowIntValue(conn, sql);
+        int articleCnt = articleService.getArticleCnt(id);
         
         if (articleCnt == 0) {
         	System.out.printf("%d번 게시물은 존재하지 않습니다\n", id);
@@ -116,43 +86,27 @@ public class ArticleController {
 		System.out.printf("수정할 내용 : ");
 		String body = sc.nextLine().trim();
 		
-		sql = new SecSql();
-        sql.append("UPDATE article");
-        sql.append("SET updateDate = NOW()");
-        sql.append(", title = ?", title);
-        sql.append(", `body` = ?", body);
-        sql.append("WHERE id = ?", id);
-
-        DBUtil.update(conn, sql);
+		articleService.modifyArticle(id, title, body);
 		
 		System.out.printf("%d번 게시물이 수정되었습니다\n", id);
 	}
 
 	public void doDelete(String cmd) {
-		int id = -1;
+		int id = articleService.getCmdNum(cmd);
 		
-        try {
-        	id = Integer.parseInt(cmd.split(" ")[2]);
-        } catch (NumberFormatException e) {
-        	System.out.println("명령어를 확인해주세요");
+		if (id == -1) {
+			System.out.println("명령어를 확인해주세요");
+			return;
 		}
         
-        SecSql sql = new SecSql();
-        sql.append("SELECT COUNT(id) > 0 FROM article");
-        sql.append("WHERE id = ?", id);
-
-        boolean isExists = DBUtil.selectRowBooleanValue(conn, sql);
+        boolean isExists = articleService.isExists(id);
         
         if (isExists == false) {
         	System.out.printf("%d번 게시물은 존재하지 않습니다\n", id);
         	return;
         }
         
-        sql = new SecSql();
-        sql.append("DELETE FROM article");
-        sql.append("WHERE id = ?", id);
-        
-        DBUtil.delete(conn, sql);
+        articleService.deleteArticle(id);
         
         System.out.printf("%d번 게시물이 삭제되었습니다\n", id);
 	}
