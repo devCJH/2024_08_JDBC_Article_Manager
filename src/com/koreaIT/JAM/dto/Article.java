@@ -7,6 +7,8 @@ public class Article {
 	private int id;
 	private LocalDateTime regDate;
 	private LocalDateTime updateDate;
+	private int memberId;
+	private String writerName;
 	private String title;
 	private String body;
 	
@@ -14,6 +16,8 @@ public class Article {
 		this.id = (int) articleMap.get("id");
 		this.regDate = (LocalDateTime) articleMap.get("regDate");
 		this.updateDate = (LocalDateTime) articleMap.get("updateDate");
+		this.memberId = (int) articleMap.get("memberId");
+		this.writerName = (String) articleMap.get("writerName");
 		this.title = (String) articleMap.get("title");
 		this.body = (String) articleMap.get("body");
 	}
@@ -35,6 +39,18 @@ public class Article {
 	}
 	public void setUpdateDate(LocalDateTime updateDate) {
 		this.updateDate = updateDate;
+	}
+	public int getMemberId() {
+		return memberId;
+	}
+	public void setMemberId(int memberId) {
+		this.memberId = memberId;
+	}
+	public String getWriterName() {
+		return writerName;
+	}
+	public void setWriterName(String writerName) {
+		this.writerName = writerName;
 	}
 	public String getTitle() {
 		return title;

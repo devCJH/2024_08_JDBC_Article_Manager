@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 import com.koreaIT.JAM.dto.Article;
 import com.koreaIT.JAM.service.ArticleService;
+import com.koreaIT.JAM.session.Session;
 
 public class ArticleController {
 
@@ -18,14 +19,17 @@ public class ArticleController {
 	}
 
 	public void doWrite() {
+		if (Session.getLoginedMemberId() == -1) {
+			System.out.println("로그인 후 이용해주세요");
+			return;
+		}
+		
 		System.out.printf("제목 : ");
 		String title = sc.nextLine().trim();
 		System.out.printf("내용 : ");
 		String body = sc.nextLine().trim();
 		
-		articleService.writeArticle(title, body);
-		
-		int id = articleService.getLastInsertId();
+		int id = articleService.writeArticle(Session.getLoginedMemberId(), title, body);
 		
 		System.out.printf("%d번 게시물이 작성되었습니다\n", id);
 	}
@@ -38,9 +42,9 @@ public class ArticleController {
 			return;
 		}
 		
-		System.out.println("번호	|	제목	|	작성일");
+		System.out.println("번호	|	제목	|	작성자	|	작성일");
 		for (Article article : articles) {
-			System.out.printf("%d	|	%s	|	%s\n", article.getId(), article.getTitle(), article.getUpdateDate());
+			System.out.printf("%d	|	%s	|	%s	|	%s\n", article.getId(), article.getTitle(), article.getWriterName(), article.getUpdateDate());
 		}
 	}
 
@@ -62,6 +66,7 @@ public class ArticleController {
         System.out.printf("번호 : %d\n", article.getId());
         System.out.printf("작성일 : %s\n", article.getRegDate());
         System.out.printf("수정일 : %s\n", article.getUpdateDate());
+        System.out.printf("작성자 : %s\n", article.getWriterName());
         System.out.printf("제목 : %s\n", article.getTitle());
         System.out.printf("내용 : %s\n", article.getBody());
 	}

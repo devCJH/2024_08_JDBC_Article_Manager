@@ -16,14 +16,10 @@ public class ArticleService {
 		this.articleDao = new ArticleDao(conn);
 	}
 
-	public void writeArticle(String title, String body) {
-		articleDao.writeArticle(title, body);
+	public int writeArticle(int loginedMemberId, String title, String body) {
+		return articleDao.writeArticle(loginedMemberId, title, body);
 	}
 
-	public int getLastInsertId() {
-		return articleDao.getLastInsertId();
-	}
-	
 	public List<Article> getArticles() {
 		List<Map<String, Object>> articleListMap = articleDao.getArticles();
 		
