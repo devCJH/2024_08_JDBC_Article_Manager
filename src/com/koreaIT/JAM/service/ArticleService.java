@@ -42,16 +42,18 @@ public class ArticleService {
 		return new Article(articleMap);
 	}
 
-	public int getArticleCnt(int id) {
-		return articleDao.getArticleCnt(id);
+	public Article getArticleById(int id) {
+		Map<String, Object> articleMap = articleDao.getArticleById(id);
+		
+		if (articleMap.isEmpty()) {
+			return null;
+		}
+		
+		return new Article(articleMap);
 	}
 
 	public void modifyArticle(int id, String title, String body) {
 		articleDao.modifyArticle(id, title, body);
-	}
-
-	public boolean isExists(int id) {
-		return articleDao.isExists(id);
 	}
 
 	public void deleteArticle(int id) {
