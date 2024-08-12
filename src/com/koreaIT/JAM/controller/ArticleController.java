@@ -35,17 +35,28 @@ public class ArticleController {
 		System.out.printf("%d번 게시물이 작성되었습니다\n", id);
 	}
 
-	public void showList() {
-		List<Article> articles = articleService.getArticles();
-        
+	public void showList(String cmd) {
+		String searchKeyword = cmd.substring("article list".length()).trim();
+
+		List<Article> articles = articleService.getArticles(searchKeyword);
+		
+		if (searchKeyword.length() > 0) {
+			System.out.println("검색어 : " + searchKeyword);
+			
+			if (articles.size() == 0) {
+				System.out.println("검색결과가 없습니다");
+				return;
+			}
+		}
+		
 		if (articles.size() == 0) {
 			System.out.println("게시물이 없습니다");
 			return;
 		}
 		
-		System.out.println("번호	|	제목	|	작성자	|	작성일");
+		System.out.println("번호	|	제목	|	작성자	|		작성일		|	조회수");
 		for (Article article : articles) {
-			System.out.printf("%d	|	%s	|	%s	|	%s\n", article.getId(), article.getTitle(), article.getWriterName(), Util.datetimeFormat(article.getUpdateDate()));
+			System.out.printf("%d	|	%s	|	%s	|	%s	|	%d\n", article.getId(), article.getTitle(), article.getWriterName(), Util.datetimeFormat(article.getUpdateDate()), article.getvCnt());
 		}
 	}
 
@@ -56,18 +67,21 @@ public class ArticleController {
 			System.out.println("명령어를 확인해주세요");
 			return;
 		}
-        
-        Article article = articleService.getArticle(id);
-        
-		if (article == null) {
-        	System.out.printf("%d번 게시물은 존재하지 않습니다\n", id);
-        	return;
-        }
+		
+		int affectedRow = articleService.increaseVCnt(id);
+		
+		if (affectedRow == 0) {
+			System.out.printf("%d번 게시물은 존재하지 않습니다\n", id);
+			return;
+		}
+		
+		Article article = articleService.getArticle(id);
 		
         System.out.printf("번호 : %d\n", article.getId());
         System.out.printf("작성일 : %s\n", Util.datetimeFormat(article.getRegDate()));
         System.out.printf("수정일 : %s\n", Util.datetimeFormat(article.getUpdateDate()));
         System.out.printf("작성자 : %s\n", article.getWriterName());
+        System.out.printf("조회수 : %s\n", article.getvCnt());
         System.out.printf("제목 : %s\n", article.getTitle());
         System.out.printf("내용 : %s\n", article.getBody());
 	}
